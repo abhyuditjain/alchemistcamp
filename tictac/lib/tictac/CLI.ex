@@ -11,6 +11,23 @@ defmodule Tictac.CLI do
     |> String.to_atom()
   end
 
+  def handle(%State{status: :playing} = state, :request_move) do
+    display_board(state.board)
+    IO.puts("What's #{state.turn}'s next move?")
+    col = IO.gets("Col: ") |> trimmed_int()
+    row = IO.gets("Row: ") |> trimmed_int()
+    {col, row}
+  end
+
+  def handle(%State{status: :game_over} = state, _) do
+    display_board(state.board)
+
+    case state.winner do
+      :tie -> "Another tie? That's what's wrong with this game!!!"
+      _ -> "Player #{state.winner} is victorious!!!"
+    end
+  end
+
   def show(board, c, r) do
     [item] = for {%{col: col, row: row}, v} <- board, col == c, row == r, do: v
     if item == :empty, do: " ", else: to_string(item)
@@ -24,5 +41,11 @@ defmodule Tictac.CLI do
     ---------
     #{show(b, 1, 3)} | #{show(b, 2, 3)} | #{show(b, 3, 3)}
     """)
+  end
+
+  def trimmed_int(str) do
+    str
+    |> String.trim()
+    |> String.to_integer()
   end
 end
